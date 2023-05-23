@@ -15,6 +15,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import com.opencsv.CSVReader;
+
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -32,15 +33,20 @@ public class LoadCSV extends AppCompatActivity {
 
         ArrayList<String[]> csvData = new ArrayList<>();
 
-        csvData= CsvRead("/sdcard/csv_dir/data.csv");
-        LineDataSet lineDataSet1 =  new LineDataSet(DataValues(csvData),"temperature");
+        csvData = CsvRead("/sdcard/csv_dir/data.csv");
+
+//        LineDataSet lineDataSet1 = new LineDataSet(DataValues(csvData), "temperature");
+        LineDataSet lineDataSet1 = new LineDataSet(DataValues2(csvData, 0), "X value");
+        LineDataSet lineDataSet2 = new LineDataSet(DataValues2(csvData, 1), "Y value");
+        LineDataSet lineDataSet3 = new LineDataSet(DataValues2(csvData, 2), "Z value");
+
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(lineDataSet1);
+        dataSets.add(lineDataSet2);
+        dataSets.add(lineDataSet3);
         LineData data = new LineData(dataSets);
         lineChart.setData(data);
         lineChart.invalidate();
-
-
 
 
         BackButton.setOnClickListener(new View.OnClickListener() {
@@ -51,35 +57,51 @@ public class LoadCSV extends AppCompatActivity {
         });
     }
 
-    private void ClickBack(){
+    private void ClickBack() {
         finish();
 
     }
 
-    private ArrayList<String[]> CsvRead(String path){
+    private ArrayList<String[]> CsvRead(String path) {
         ArrayList<String[]> CsvData = new ArrayList<>();
         try {
             File file = new File(path);
             CSVReader reader = new CSVReader(new FileReader(file));
-            String[]nextline;
-            while((nextline = reader.readNext())!= null){
-                if(nextline != null){
+            String[] nextline;
+            while ((nextline = reader.readNext()) != null) {
+                if (nextline != null) {
                     CsvData.add(nextline);
 
                 }
             }
 
-        }catch (Exception e){}
+        } catch (Exception e) {
+        }
         return CsvData;
     }
 
-    private ArrayList<Entry> DataValues(ArrayList<String[]> csvData){
+    private ArrayList<Entry> DataValues(ArrayList<String[]> csvData) {
         ArrayList<Entry> dataVals = new ArrayList<Entry>();
-        for (int i = 0; i < csvData.size(); i++){
+        for (int i = 0; i < csvData.size(); i++) {
 
             dataVals.add(new Entry(Integer.parseInt(csvData.get(i)[1]),
                     Float.parseFloat(csvData.get(i)[0])));
 
+
+        }
+
+        return dataVals;
+    }
+
+
+    private ArrayList<Entry> DataValues2(ArrayList<String[]> csvData, int idx) {
+        ArrayList<Entry> dataVals = new ArrayList<Entry>();
+        int counter = 0;
+        for (int i = 0; i < csvData.size(); i++) {
+
+            dataVals.add(new Entry(counter,
+                    Float.parseFloat(csvData.get(i)[idx])));
+            counter++;
 
         }
 

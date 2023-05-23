@@ -155,14 +155,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         receiveText.setTextColor(getResources().getColor(R.color.colorRecieveText)); // set as default color to reduce number of spans
         receiveText.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-        sendText = view.findViewById(R.id.send_text);
-        hexWatcher = new TextUtil.HexWatcher(sendText);
-        hexWatcher.enable(hexEnabled);
-        sendText.addTextChangedListener(hexWatcher);
-        sendText.setHint(hexEnabled ? "HEX mode" : "");
-
-        View sendBtn = view.findViewById(R.id.send_btn);
-        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
+//        sendText = view.findViewById(R.id.send_text);
+//        hexWatcher = new TextUtil.HexWatcher(sendText);
+//        hexWatcher.enable(hexEnabled);
+//        sendText.addTextChangedListener(hexWatcher);
+//        sendText.setHint(hexEnabled ? "HEX mode" : "");
+//
+//        View sendBtn = view.findViewById(R.id.send_btn);
+//        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
 
         mpLineChart = (LineChart) view.findViewById(R.id.line_chart);
         lineDataSet1 = new LineDataSet(emptyDataValues(), "X value");
@@ -187,10 +187,18 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             public void onClick(View v) {
                 Toast.makeText(getContext(), "Clear", Toast.LENGTH_SHORT).show();
                 LineData data = mpLineChart.getData();
-                ILineDataSet set = data.getDataSetByIndex(0);
-                data.getDataSetByIndex(0);
-                while (set.removeLast()) {
+                for (int i = 0; i < 3; i++) {
+                    ILineDataSet set = data.getDataSetByIndex(i);
+                    data.getDataSetByIndex(i);
+                    while (set.removeLast()) {
+                    }
                 }
+
+                counter = 0;
+//                ILineDataSet set = data.getDataSetByIndex(0);
+//                data.getDataSetByIndex(0);
+//                while (set.removeLast()) {
+//                }
 
             }
         });
@@ -312,6 +320,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 msg_to_save = msg.replace(TextUtil.newline_crlf, TextUtil.emptyString);
                 // check message length
                 if (msg_to_save.length() > 1) {
+//                    String[] test = msg_to_save.split(" ");
+//                    if (test.length > 3) {
+//                        msg_to_save = msg_to_save[:3];
+//                    }
                     // split message string by ',' char
                     String[] parts = msg_to_save.split(",");
                     // function to trim blank spaces
