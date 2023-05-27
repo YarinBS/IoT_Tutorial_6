@@ -216,6 +216,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     }
                 }
 
+                if (StopFlag) {
+                    lineDataSet1.notifyDataSetChanged(); // let the data know a dataSet changed
+                    lineDataSet2.notifyDataSetChanged(); // let the data know a dataSet changed
+                    lineDataSet3.notifyDataSetChanged(); // let the data know a dataSet changed
+                    mpLineChart.notifyDataSetChanged(); // let the chart know it's data changed
+                    mpLineChart.invalidate(); // refresh
+                }
+
                 counter = 0;
 
             }
@@ -223,20 +231,22 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
         buttonSaveRecording.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                writeToCsv(rows, fileName.getText().toString(), numberOfSteps.getText().toString(), mode);
+                if (!fileName.getText().toString().isEmpty() && !numberOfSteps.getText().toString().isEmpty()) {
+                    Toast.makeText(getContext(), "Save", Toast.LENGTH_SHORT).show();
+                    writeToCsv(rows, fileName.getText().toString(), numberOfSteps.getText().toString(), mode);
+                }
+                else {
+                    Toast.makeText(getContext(), "Fill all the necessary values", Toast.LENGTH_SHORT).show();
+                }
+
                 // Also reset
-                Toast.makeText(getContext(), "Save", Toast.LENGTH_SHORT).show();
-                dataSets.clear();
-                data = new LineData(dataSets);
-                mpLineChart.setData(data);
-                mpLineChart.invalidate();
-//                LineData data = mpLineChart.getData();
-//                for (int i = 0; i < 3; i++) {
-//                    ILineDataSet set = data.getDataSetByIndex(i);
-//                    data.getDataSetByIndex(i);
-//                    while (set.removeLast()) {
-//                    }
-//                }
+                LineData data = mpLineChart.getData();
+                for (int i = 0; i < 3; i++) {
+                    ILineDataSet set = data.getDataSetByIndex(i);
+                    data.getDataSetByIndex(i);
+                    while (set.removeLast()) {
+                    }
+                }
                 counter = 0;
                 // Clear saved records
                 ArrayList<String[]> rows = new ArrayList<>();
@@ -280,6 +290,12 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     while (set.removeLast()) {
                     }
                 }
+
+                lineDataSet1.notifyDataSetChanged(); // let the data know a dataSet changed
+                lineDataSet2.notifyDataSetChanged(); // let the data know a dataSet changed
+                lineDataSet3.notifyDataSetChanged(); // let the data know a dataSet changed
+                mpLineChart.notifyDataSetChanged(); // let the chart know it's data changed
+                mpLineChart.invalidate(); // refresh
 
                 counter = 0;
                 // Clear saved records
@@ -395,9 +411,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         if (hexEnabled) {
             receiveText.append(TextUtil.toHexString(message) + '\n');
         } else {
-            if (StopFlag) {
-                StartFlag = false;
-            }
+            if (StopFlag) {}
             if (StartFlag) {
                 // All the stuff in receive() goes here
                 String msg = new String(message);
