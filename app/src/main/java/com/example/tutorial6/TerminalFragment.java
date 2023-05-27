@@ -23,8 +23,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -185,6 +187,15 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         Button buttonClear = (Button) view.findViewById(R.id.button1);
         Button buttonCsvShow = (Button) view.findViewById(R.id.button2);
 
+        Button buttonStartRecording = (Button) view.findViewById(R.id.start);
+        Button buttonStopRecording = (Button) view.findViewById(R.id.stop);
+        Button buttonResetRecording = (Button) view.findViewById(R.id.reset);
+        Button buttonSaveRecording = (Button) view.findViewById(R.id.save);
+
+        ToggleButton mode = view.findViewById(R.id.WALKING);
+
+        EditText fileName = view.findViewById(R.id.fileName);
+        EditText numberOfSteps = view.findViewById(R.id.NumberOfSteps);
 
         buttonClear.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
