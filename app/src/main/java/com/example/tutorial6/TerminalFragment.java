@@ -49,6 +49,9 @@ import java.util.Date;
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
     int counter = 0;
 
+    boolean StartFlag = false;
+    boolean StopFlag = false;
+
     private enum Connected {False, Pending, True}
 
     private String deviceAddress;
@@ -71,7 +74,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     ArrayList<ILineDataSet> dataSets = new ArrayList<>();
     LineData data;
 
-    ArrayList<String []> rows = new ArrayList<>();;
+    ArrayList<String[]> rows = new ArrayList<>();
+    ;
 
 
     /*
@@ -220,7 +224,19 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         buttonSaveRecording.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 writeToCsv(rows, fileName.getText().toString(), numberOfSteps.getText().toString(), mode);
-
+                // Also reset
+                Toast.makeText(getContext(), "Save", Toast.LENGTH_SHORT).show();
+                LineData data = mpLineChart.getData();
+                for (int i = 0; i < 3; i++) {
+                    ILineDataSet set = data.getDataSetByIndex(i);
+                    data.getDataSetByIndex(i);
+                    while (set.removeLast()) {
+                    }
+                }
+                counter = 0;
+                // Clear saved records
+                ArrayList<String[]> rows = new ArrayList<>();
+                receiveText.setText("");
             }
         });
 
@@ -232,9 +248,48 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             }
         });
 
+        buttonStartRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                StartFlag = true;
+                StopFlag = false;
+            }
+        });
+
+        buttonStopRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                StartFlag = false;
+                StopFlag = true;
+            }
+        });
+
+        buttonResetRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Clear graph
+                Toast.makeText(getContext(), "Reset", Toast.LENGTH_SHORT).show();
+                LineData data = mpLineChart.getData();
+                for (int i = 0; i < 3; i++) {
+                    ILineDataSet set = data.getDataSetByIndex(i);
+                    data.getDataSetByIndex(i);
+                    while (set.removeLast()) {
+                    }
+                }
+                counter = 0;
+                // Clear saved records
+                rows = new ArrayList<>();
+                receiveText.setText("");
+
+                // Resetting text fields and mode button
+                fileName.setText("");
+                numberOfSteps.setText("");
+                mode.setChecked(false);
+            }
+        });
+
         return view;
     }
-
 
 
     @Override
@@ -335,19 +390,24 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         if (hexEnabled) {
             receiveText.append(TextUtil.toHexString(message) + '\n');
         } else {
-            String msg = new String(message);
-            if (newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
-                // don't show CR as ^M if directly before LF
-                String msg_to_save = msg;
-                msg_to_save = msg.replace(TextUtil.newline_crlf, TextUtil.emptyString);
-                // check message length
-                if (msg_to_save.length() > 1) {
-                    // split message string by ',' char
-                    String[] parts = msg_to_save.split(",");
-                    // function to trim blank spaces
-                    parts = clean_str(parts);
+            if (StopFlag) {
+                StartFlag = false;
+            }
+            if (StartFlag) {
+                // All the stuff in receive() goes here
+                String msg = new String(message);
+                if (newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
+                    // don't show CR as ^M if directly before LF
+                    String msg_to_save = msg;
+                    msg_to_save = msg.replace(TextUtil.newline_crlf, TextUtil.emptyString);
+                    // check message length
+                    if (msg_to_save.length() > 1) {
+                        // split message string by ',' char
+                        String[] parts = msg_to_save.split(",");
+                        // function to trim blank spaces
+                        parts = clean_str(parts);
 
-                    // saving data to csv
+                        // saving data to csv
 //                    try {
                         // create new csv unless file already exists
 //                        File file = new File("/sdcard/csv_dir/");
@@ -356,7 +416,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 //                        CSVWriter csvWriter = new CSVWriter(new FileWriter(csv, true));
 
                         // parse string values, in this case [0] is tmp & [1] is count (t)
-                        String row[] = new String[]{String.valueOf(counter/10), parts[0], parts[1], parts[2]};
+                        String row[] = new String[]{String.valueOf((double) counter / 10), parts[0], parts[1], parts[2]};
 
                         // In case we get a reading like '8.02-0.01' or '8.158.14', we take only the first 4 characters
                         if (parts[2].length() > 5) {
@@ -382,19 +442,21 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 //                    } catch (IOException e) {
 //                        e.printStackTrace();
 //                    }
-                }
+                    }
 
-                msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
-                // send msg to function that saves it to csv
-                // special handling if CR and LF come in separate fragments
-                if (pendingNewline && msg.charAt(0) == '\n') {
-                    Editable edt = receiveText.getEditableText();
-                    if (edt != null && edt.length() > 1)
-                        edt.replace(edt.length() - 2, edt.length(), "");
+                    msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
+                    // send msg to function that saves it to csv
+                    // special handling if CR and LF come in separate fragments
+                    if (pendingNewline && msg.charAt(0) == '\n') {
+                        Editable edt = receiveText.getEditableText();
+                        if (edt != null && edt.length() > 1)
+                            edt.replace(edt.length() - 2, edt.length(), "");
+                    }
+                    pendingNewline = msg.charAt(msg.length() - 1) == '\r';
                 }
-                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
+                receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
             }
-            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
+
         }
     }
 
@@ -417,11 +479,10 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             Date date = new Date();
             String row2[] = new String[]{"EXPERIMENT TIME: ", datetime.format(date)};
             csvWriter.writeNext(row2);
-            if (mode.isChecked()){
+            if (mode.isChecked()) {
                 String row3[] = new String[]{"ACTIVITY TYPE: ", mode.getTextOn().toString()};
                 csvWriter.writeNext(row3);
-            }
-            else{
+            } else {
                 String row3[] = new String[]{"ACTIVITY TYPE: ", mode.getTextOff().toString()};
                 csvWriter.writeNext(row3);
             }
@@ -430,6 +491,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             csvWriter.writeNext(row4);
             csvWriter.writeNext(new String[]{});
             String row5[] = new String[]{"Time[sec]", "ACC X", "ACC Y", "ACC Z"};
+            csvWriter.writeNext(row5);
             for (int i = 0; i < rows.size(); i++) {
                 csvWriter.writeNext(rows.get(i));
             }
