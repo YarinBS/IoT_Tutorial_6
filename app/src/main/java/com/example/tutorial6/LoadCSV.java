@@ -3,7 +3,6 @@ package com.example.tutorial6;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -21,8 +20,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 
-import java.util.List;
-
 
 public class LoadCSV extends AppCompatActivity {
     @Override
@@ -31,15 +28,15 @@ public class LoadCSV extends AppCompatActivity {
         setContentView(R.layout.activity_load_csv);
         Button BackButton = (Button) findViewById(R.id.button_back);
         LineChart lineChart = (LineChart) findViewById(R.id.line_chart);
+        String receivedFilename = getIntent().getStringExtra("FILENAME_KEY");
 
         ArrayList<String[]> csvData = new ArrayList<>();
 
-        csvData = CsvRead("/sdcard/csv_dir/data.csv");
+        csvData = CsvRead("/sdcard/csv_dir/" + receivedFilename + ".csv");
 
-//        LineDataSet lineDataSet1 = new LineDataSet(DataValues(csvData), "temperature");
-        LineDataSet lineDataSet1 = new LineDataSet(DataValues2(csvData, 0), "X value");
-        LineDataSet lineDataSet2 = new LineDataSet(DataValues2(csvData, 1), "Y value");
-        LineDataSet lineDataSet3 = new LineDataSet(DataValues2(csvData, 2), "Z value");
+        LineDataSet lineDataSet1 = new LineDataSet(DataValues(csvData, 0), "X value");
+        LineDataSet lineDataSet2 = new LineDataSet(DataValues(csvData, 1), "Y value");
+        LineDataSet lineDataSet3 = new LineDataSet(DataValues(csvData, 2), "Z value");
         lineDataSet1.setColor(Color.RED);
         lineDataSet2.setColor(Color.GREEN);
         lineDataSet3.setColor(Color.BLUE);
@@ -87,21 +84,21 @@ public class LoadCSV extends AppCompatActivity {
         return CsvData;
     }
 
-    private ArrayList<Entry> DataValues(ArrayList<String[]> csvData) {
-        ArrayList<Entry> dataVals = new ArrayList<Entry>();
-        for (int i = 0; i < csvData.size(); i++) {
+//    private ArrayList<Entry> DataValues(ArrayList<String[]> csvData) {
+//        ArrayList<Entry> dataVals = new ArrayList<Entry>();
+//        for (int i = 0; i < csvData.size(); i++) {
+//
+//            dataVals.add(new Entry(Integer.parseInt(csvData.get(i)[1]),
+//                    Float.parseFloat(csvData.get(i)[0])));
+//
+//
+//        }
+//
+//        return dataVals;
+//    }
 
-            dataVals.add(new Entry(Integer.parseInt(csvData.get(i)[1]),
-                    Float.parseFloat(csvData.get(i)[0])));
 
-
-        }
-
-        return dataVals;
-    }
-
-
-    private ArrayList<Entry> DataValues2(ArrayList<String[]> csvData, int idx) {
+    private ArrayList<Entry> DataValues(ArrayList<String[]> csvData, int idx) {
         ArrayList<Entry> dataVals = new ArrayList<Entry>();
         int counter = 0;
         for (int i = 0; i < csvData.size(); i++) {
