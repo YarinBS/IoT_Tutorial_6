@@ -273,17 +273,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             public void onClick(View view) {
                 // Clear graph
                 Toast.makeText(getContext(), "Reset", Toast.LENGTH_SHORT).show();
-                dataSets.clear();
-                data = new LineData(dataSets);
-                mpLineChart.setData(data);
-                mpLineChart.invalidate();
-//                LineData data = mpLineChart.getData();
-//                for (int i = 0; i < 3; i++) {
-//                    ILineDataSet set = data.getDataSetByIndex(i);
-//                    data.getDataSetByIndex(i);
-//                    while (set.removeLast()) {
-//                    }
-//                }
+                LineData data = mpLineChart.getData();
+                for (int i = 0; i < 3; i++) {
+                    ILineDataSet set = data.getDataSetByIndex(i);
+                    data.getDataSetByIndex(i);
+                    while (set.removeLast()) {
+                    }
+                }
+
                 counter = 0;
                 // Clear saved records
                 rows = new ArrayList<>();

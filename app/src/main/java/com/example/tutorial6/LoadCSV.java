@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -31,6 +32,11 @@ public class LoadCSV extends AppCompatActivity {
         String receivedFilename = getIntent().getStringExtra("FILENAME_KEY");
 
         ArrayList<String[]> csvData = new ArrayList<>();
+
+        File tmpDir = new File("/sdcard/csv_dir/" + receivedFilename + ".csv");
+        if (!tmpDir.exists()) {
+            finish();
+        }
 
         csvData = CsvRead("/sdcard/csv_dir/" + receivedFilename + ".csv");
 
@@ -101,12 +107,12 @@ public class LoadCSV extends AppCompatActivity {
     private ArrayList<Entry> DataValues(ArrayList<String[]> csvData, int idx) {
         ArrayList<Entry> dataVals = new ArrayList<Entry>();
         int counter = 0;
-        for (int i = 0; i < csvData.size(); i++) {
+        for (int i = 6; i < csvData.size(); i++) {
 
             try {
-                dataVals.add(new Entry(counter, Float.parseFloat(csvData.get(i)[idx])));
+                dataVals.add(new Entry(counter, Float.parseFloat(csvData.get(i)[idx+1])));
             } catch (NumberFormatException e) {
-                dataVals.add(new Entry(counter, Float.parseFloat(csvData.get(i)[idx].substring(0, 4))));
+                dataVals.add(new Entry(counter, Float.parseFloat(csvData.get(i)[idx+1].substring(0, 4))));
             }
             counter++;
         }
