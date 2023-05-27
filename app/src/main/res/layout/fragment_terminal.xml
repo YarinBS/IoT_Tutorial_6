@@ -66,17 +66,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.245" />
 
-        <TextView
-            android:id="@+id/FileName"
-            android:layout_width="203dp"
-            android:layout_height="52dp"
-            android:layout_marginTop="28dp"
-            android:hint="File name..."
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.507"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/NumberOfSteps" />
-
         <ToggleButton
             android:id="@+id/WALKING"
             android:layout_width="wrap_content"
@@ -86,8 +75,21 @@
             android:textOn="RUNNING"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <EditText
+            android:id="@+id/fileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="File name..."
+            android:inputType="textPersonName"
+            android:minHeight="48dp"
+            app:layout_constraintBottom_toTopOf="@+id/WALKING"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/FileName" />
+            app:layout_constraintTop_toBottomOf="@+id/NumberOfSteps" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

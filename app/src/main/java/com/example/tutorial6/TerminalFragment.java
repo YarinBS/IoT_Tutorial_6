@@ -171,6 +171,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         lineDataSet1.setColor(Color.RED);
         lineDataSet2.setColor(Color.GREEN);
         lineDataSet3.setColor(Color.BLUE);
+        lineDataSet1.setCircleColor(Color.RED);
+        lineDataSet2.setCircleColor(Color.GREEN);
+        lineDataSet3.setCircleColor(Color.BLUE);
 
         dataSets.add(lineDataSet1);
         dataSets.add(lineDataSet2);
@@ -314,16 +317,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         } else {
             String msg = new String(message);
             if (newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
-//                Toast.makeText(getActivity(), "TOAST", Toast.LENGTH_SHORT).show();
                 // don't show CR as ^M if directly before LF
                 String msg_to_save = msg;
                 msg_to_save = msg.replace(TextUtil.newline_crlf, TextUtil.emptyString);
                 // check message length
                 if (msg_to_save.length() > 1) {
-//                    String[] test = msg_to_save.split(" ");
-//                    if (test.length > 3) {
-//                        msg_to_save = msg_to_save[:3];
-//                    }
                     // split message string by ',' char
                     String[] parts = msg_to_save.split(",");
                     // function to trim blank spaces
@@ -331,7 +329,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                     // saving data to csv
                     try {
-
                         // create new csv unless file already exists
                         File file = new File("/sdcard/csv_dir/");
                         file.mkdirs();
@@ -340,6 +337,12 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
                         // parse string values, in this case [0] is tmp & [1] is count (t)
                         String row[] = new String[]{parts[0], parts[1], parts[2]};
+
+                        // In case we get a reading like '8.02-0.01' or '8.158.14', we take only the first 4 characters
+                        if (parts[2].length() > 5) {
+                            row[2] = row[2].substring(0, 4);
+                        }
+
                         csvWriter.writeNext(row);
                         csvWriter.close();
 

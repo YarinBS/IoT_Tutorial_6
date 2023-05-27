@@ -4,6 +4,7 @@ package com.example.tutorial6;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -39,6 +40,12 @@ public class LoadCSV extends AppCompatActivity {
         LineDataSet lineDataSet1 = new LineDataSet(DataValues2(csvData, 0), "X value");
         LineDataSet lineDataSet2 = new LineDataSet(DataValues2(csvData, 1), "Y value");
         LineDataSet lineDataSet3 = new LineDataSet(DataValues2(csvData, 2), "Z value");
+        lineDataSet1.setColor(Color.RED);
+        lineDataSet2.setColor(Color.GREEN);
+        lineDataSet3.setColor(Color.BLUE);
+        lineDataSet1.setCircleColor(Color.RED);
+        lineDataSet2.setCircleColor(Color.GREEN);
+        lineDataSet3.setCircleColor(Color.BLUE);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(lineDataSet1);
@@ -99,13 +106,13 @@ public class LoadCSV extends AppCompatActivity {
         int counter = 0;
         for (int i = 0; i < csvData.size(); i++) {
 
-            dataVals.add(new Entry(counter,
-                    Float.parseFloat(csvData.get(i)[idx])));
+            try {
+                dataVals.add(new Entry(counter, Float.parseFloat(csvData.get(i)[idx])));
+            } catch (NumberFormatException e) {
+                dataVals.add(new Entry(counter, Float.parseFloat(csvData.get(i)[idx].substring(0, 4))));
+            }
             counter++;
-
         }
-
         return dataVals;
     }
-
 }
