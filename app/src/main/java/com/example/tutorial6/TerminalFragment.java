@@ -43,6 +43,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
     int counter = 0;
@@ -68,6 +70,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     LineDataSet lineDataSet3;
     ArrayList<ILineDataSet> dataSets = new ArrayList<>();
     LineData data;
+
+    ArrayList<String []> rows = new ArrayList<>();;
 
 
     /*
@@ -192,7 +196,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         Button buttonResetRecording = (Button) view.findViewById(R.id.reset);
         Button buttonSaveRecording = (Button) view.findViewById(R.id.save);
 
-        ToggleButton mode = view.findViewById(R.id.WALKING);
+        ToggleButton mode = view.findViewById(R.id.modeButton);
 
         EditText fileName = view.findViewById(R.id.fileName);
         EditText numberOfSteps = view.findViewById(R.id.NumberOfSteps);
@@ -209,10 +213,13 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 }
 
                 counter = 0;
-//                ILineDataSet set = data.getDataSetByIndex(0);
-//                data.getDataSetByIndex(0);
-//                while (set.removeLast()) {
-//                }
+
+            }
+        });
+
+        buttonSaveRecording.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                writeToCsv(rows, fileName.getText().toString(), numberOfSteps.getText().toString(), mode);
 
             }
         });
@@ -227,6 +234,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
         return view;
     }
+
+
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
@@ -339,23 +348,25 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     parts = clean_str(parts);
 
                     // saving data to csv
-                    try {
+//                    try {
                         // create new csv unless file already exists
-                        File file = new File("/sdcard/csv_dir/");
-                        file.mkdirs();
-                        String csv = "/sdcard/csv_dir/data.csv";
-                        CSVWriter csvWriter = new CSVWriter(new FileWriter(csv, true));
+//                        File file = new File("/sdcard/csv_dir/");
+//                        file.mkdirs();
+//                        String csv = "/sdcard/csv_dir/data.csv";
+//                        CSVWriter csvWriter = new CSVWriter(new FileWriter(csv, true));
 
                         // parse string values, in this case [0] is tmp & [1] is count (t)
-                        String row[] = new String[]{parts[0], parts[1], parts[2]};
+                        String row[] = new String[]{String.valueOf(counter/10), parts[0], parts[1], parts[2]};
 
                         // In case we get a reading like '8.02-0.01' or '8.158.14', we take only the first 4 characters
                         if (parts[2].length() > 5) {
                             row[2] = row[2].substring(0, 4);
                         }
 
-                        csvWriter.writeNext(row);
-                        csvWriter.close();
+                        rows.add(row);
+//
+//                        csvWriter.writeNext(row);
+//                        csvWriter.close();
 
                         // add received values to line dataset for plotting the linechart
                         data.addEntry(new Entry(counter, Float.parseFloat(parts[0])), 0);
@@ -368,9 +379,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                         mpLineChart.invalidate(); // refresh
                         counter += 1;
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
                 }
 
                 msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
@@ -391,6 +402,43 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         SpannableStringBuilder spn = new SpannableStringBuilder(str + '\n');
         spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorStatusText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         receiveText.append(spn);
+    }
+
+    private void writeToCsv(ArrayList<String[]> rows, String fileName, String numberOfSteps, ToggleButton mode) {
+        try {
+            //     create new csv unless file already exists
+            File file = new File("/sdcard/csv_dir/");
+            file.mkdirs();
+            String csv = "/sdcard/csv_dir/" + fileName + ".csv";
+            CSVWriter csvWriter = new CSVWriter(new FileWriter(csv, true));
+            String row1[] = new String[]{"NAME: ", fileName + ".csv"};
+            csvWriter.writeNext(row1);
+            SimpleDateFormat datetime = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date date = new Date();
+            String row2[] = new String[]{"EXPERIMENT TIME: ", datetime.format(date)};
+            csvWriter.writeNext(row2);
+            if (mode.isChecked()){
+                String row3[] = new String[]{"ACTIVITY TYPE: ", mode.getTextOn().toString()};
+                csvWriter.writeNext(row3);
+            }
+            else{
+                String row3[] = new String[]{"ACTIVITY TYPE: ", mode.getTextOff().toString()};
+                csvWriter.writeNext(row3);
+            }
+
+            String row4[] = new String[]{"COUNT OF ACTUAL STEPS: ", numberOfSteps};
+            csvWriter.writeNext(row4);
+            csvWriter.writeNext(new String[]{});
+            String row5[] = new String[]{"Time[sec]", "ACC X", "ACC Y", "ACC Z"};
+            for (int i = 0; i < rows.size(); i++) {
+                csvWriter.writeNext(rows.get(i));
+            }
+
+            csvWriter.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
